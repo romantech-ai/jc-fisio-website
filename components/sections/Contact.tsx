@@ -60,8 +60,25 @@ export function Contact() {
 
     setIsSubmitting(true)
 
-    // Simular envio
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Construir mensaje para WhatsApp
+    const whatsappNumber = '34744624198'
+    let message = `*Nueva solicitud de cita - JC Fisio*\n\n`
+    message += `*Nombre:* ${formData.name}\n`
+    message += `*Email:* ${formData.email}\n`
+    message += `*Telefono:* ${formData.phone}\n`
+    if (formData.service) {
+      message += `*Servicio:* ${formData.service}\n`
+    }
+    if (formData.message) {
+      message += `*Mensaje:* ${formData.message}\n`
+    }
+
+    // Codificar mensaje para URL
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
+
+    // Abrir WhatsApp en nueva ventana
+    window.open(whatsappUrl, '_blank')
 
     setIsSuccess(true)
     setFormData({ name: '', email: '', phone: '', service: '', message: '' })
@@ -180,8 +197,8 @@ export function Contact() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Mensaje enviado</h3>
-                <p className="text-gray-600 mb-6">Nos pondremos en contacto contigo pronto.</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Redirigido a WhatsApp</h3>
+                <p className="text-gray-600 mb-6">Completa el envio en WhatsApp para confirmar tu cita.</p>
                 <button
                   type="button"
                   onClick={() => setIsSuccess(false)}
