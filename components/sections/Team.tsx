@@ -1,15 +1,49 @@
 'use client'
 import { motion } from 'framer-motion'
 
+// SVG icons for each role
+const icons = {
+  fisioterapeuta: (
+    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4" />
+    </svg>
+  ),
+  nutricion: (
+    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v5M8 9h8M9 14h1M14 14h1" />
+    </svg>
+  ),
+  pilates: (
+    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <circle cx="12" cy="5" r="2" strokeWidth={1.5} />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 7v4M8 21l4-10 4 10M6 14h4M14 14h4" />
+    </svg>
+  ),
+  administracion: (
+    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  entrenador: (
+    <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 8h2M4 16h2M18 8h2M18 16h2" />
+      <rect x="6" y="6" width="12" height="12" rx="1" strokeWidth={1.5} />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6M12 9v6" />
+    </svg>
+  )
+}
+
 const team = [
-  { name: 'Javier', role: 'Fisioterapeuta', emoji: '💪' },
-  { name: 'Veronica', role: 'Fisioterapeuta', emoji: '💆‍♀️' },
-  { name: 'Selene', role: 'Fisioterapeuta', emoji: '🩺' },
-  { name: 'Bea', role: 'Fisioterapeuta', emoji: '❤️‍🩹' },
-  { name: 'Cristina', role: 'Nutricion', emoji: '🍲' },
-  { name: 'Rosa', role: 'Pilates', emoji: '🧘‍♀️' },
-  { name: 'Belen', role: 'Administracion', emoji: '📄' },
-  { name: 'Esteban', role: 'Entrenamiento personal', emoji: '🏋️' },
+  { name: 'Javier', role: 'Fisioterapeuta', icon: 'fisioterapeuta' },
+  { name: 'Veronica', role: 'Fisioterapeuta', icon: 'fisioterapeuta' },
+  { name: 'Selene', role: 'Fisioterapeuta', icon: 'fisioterapeuta' },
+  { name: 'Bea', role: 'Fisioterapeuta', icon: 'fisioterapeuta' },
+  { name: 'Cristina', role: 'Nutricion', icon: 'nutricion' },
+  { name: 'Rosa', role: 'Pilates', icon: 'pilates' },
+  { name: 'Belen', role: 'Administracion', icon: 'administracion' },
+  { name: 'Esteban', role: 'Entrenamiento personal', icon: 'entrenador' },
 ]
 
 export function Team() {
@@ -22,7 +56,7 @@ export function Team() {
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
-          <span className="inline-block px-4 py-1.5 bg-primary-100 text-primary-700 rounded-full text-sm font-medium mb-4">
+          <span className="text-primary-600 font-semibold tracking-wide uppercase text-sm mb-4 block">
             Nuestro Equipo
           </span>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
@@ -41,11 +75,10 @@ export function Team() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              whileHover={{ y: -8 }}
-              className="group bg-white rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 text-center"
+              className="group bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all duration-300 text-center"
             >
-              <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-300">
-                {member.emoji}
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300">
+                {icons[member.icon as keyof typeof icons]}
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-primary-600 transition-colors">
                 {member.name}
