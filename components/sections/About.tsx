@@ -15,7 +15,7 @@ export function About() {
           >
             <div className="aspect-[4/3] rounded-3xl overflow-hidden shadow-2xl relative">
               <Image
-                src="/images/fisiojc-ecografía.jpg"
+                src="/images/fisiojc-ecografia.jpg"
                 alt="Ecografia en Clinica JC Fisio - Tecnologia avanzada"
                 fill
                 className="object-cover"
