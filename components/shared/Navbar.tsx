@@ -8,17 +8,23 @@ const navItems = [
   { label: 'Inicio', href: '#' },
   { label: 'Servicios', href: '#servicios' },
   { label: 'Equipo', href: '#equipo' },
+  { label: 'Galeria', href: '#galeria' },
   { label: 'Testimonios', href: '#testimonios' },
   { label: 'Contacto', href: '#contacto' },
 ]
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
+  const [atTop, setAtTop] = useState(true)
   const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50)
-    window.addEventListener('scroll', handleScroll)
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      setScrolled(scrollY > 50)
+      setAtTop(scrollY < 10)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -32,10 +38,14 @@ export function Navbar() {
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
+        role="navigation"
+        aria-label="Navegacion principal"
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
-            ? 'bg-white/80 backdrop-blur-xl shadow-lg shadow-black/5'
-            : 'bg-transparent'
+            ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-black/5 py-2'
+            : atTop
+              ? 'bg-gradient-to-b from-white/60 to-transparent py-4'
+              : 'bg-transparent py-4'
         }`}
       >
         <div className="container mx-auto px-6">
@@ -87,7 +97,9 @@ export function Navbar() {
             <button
               className="lg:hidden relative z-50 p-2"
               onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Menu"
+              aria-label={mobileOpen ? 'Cerrar menu' : 'Abrir menu'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
               <div className="w-6 h-5 flex flex-col justify-between">
                 <motion.span
@@ -131,6 +143,7 @@ export function Navbar() {
             />
 
             <motion.div
+              id="mobile-menu"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}

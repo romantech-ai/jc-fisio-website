@@ -127,8 +127,23 @@ export function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg transition-shadow"
+              whileHover={{
+                y: -8,
+                rotateX: 2,
+                rotateY: -2,
+              }}
+              style={{ transformStyle: 'preserve-3d' }}
+              className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100/50"
             >
+              {/* Quote icon */}
+              <svg
+                className="w-8 h-8 text-primary-200 mb-4"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+
               {/* Stars */}
               <div className="flex gap-1 mb-4">
                 {[1, 2, 3, 4, 5].map((i) => (
@@ -143,8 +158,8 @@ export function Testimonials() {
 
               {/* Author */}
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <span className="text-primary-600 font-semibold">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-md">
+                  <span className="text-white font-bold text-lg">
                     {testimonial.name.charAt(0)}
                   </span>
                 </div>

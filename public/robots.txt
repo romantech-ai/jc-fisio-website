@@ -1,0 +1,11 @@
+# Robots.txt para Clinica JC Fisio
+# https://jcfisio.es
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://jcfisio.es/sitemap.xml
+
+# Bloquear rutas de API internas
+Disallow: /api/

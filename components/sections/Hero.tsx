@@ -1,6 +1,24 @@
 'use client'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+
+function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const count = useMotionValue(0)
+  const rounded = useTransform(count, (latest) => Math.round(latest))
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    const animation = animate(count, value, { duration: 2, ease: 'easeOut' })
+    const unsubscribe = rounded.on('change', (v) => setDisplayValue(v))
+    return () => {
+      animation.stop()
+      unsubscribe()
+    }
+  }, [value, count, rounded])
+
+  return <span>{suffix}{displayValue}</span>
+}
 
 export function Hero() {
   return (
@@ -73,11 +91,15 @@ export function Hero() {
             className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-100"
           >
             <div>
-              <p className="text-3xl font-bold text-gray-900">+500</p>
+              <p className="text-3xl font-bold text-gray-900">
+                <AnimatedCounter value={500} suffix="+" />
+              </p>
               <p className="text-sm text-gray-500">Pacientes</p>
             </div>
             <div>
-              <p className="text-3xl font-bold text-gray-900">8</p>
+              <p className="text-3xl font-bold text-gray-900">
+                <AnimatedCounter value={8} />
+              </p>
               <p className="text-sm text-gray-500">Profesionales</p>
             </div>
             <div className="flex items-center gap-2">

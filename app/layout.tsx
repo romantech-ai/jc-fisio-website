@@ -2,9 +2,14 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://jcfisio.es'),
   title: 'Clinica JC Fisio | Fisioterapia en Tomelloso',
   description: 'Clinica de fisioterapia en Tomelloso, Ciudad Real. Ofrecemos fisioterapia, nutricion, pilates, presoterapia y gimnasia pasiva. Equipo de 8 profesionales. Reserva tu cita: 744 62 41 98.',
   keywords: 'fisioterapia tomelloso, fisioterapeuta tomelloso, clinica fisioterapia ciudad real, nutricion tomelloso, pilates tomelloso, presoterapia, jc fisio',
@@ -97,11 +102,75 @@ export default function RootLayout({
               },
               priceRange: '$$',
               medicalSpecialty: 'PhysicalTherapy',
+              hasOfferCatalog: {
+                '@type': 'OfferCatalog',
+                name: 'Servicios de Salud y Bienestar',
+                itemListElement: [
+                  {
+                    '@type': 'Offer',
+                    itemOffered: {
+                      '@type': 'Service',
+                      name: 'Fisioterapia',
+                      description: 'Tratamientos personalizados para lesiones musculares, articulares, dolor de espalda y rehabilitacion.',
+                    },
+                  },
+                  {
+                    '@type': 'Offer',
+                    itemOffered: {
+                      '@type': 'Service',
+                      name: 'Nutricion',
+                      description: 'Planes nutricionales adaptados a tus objetivos de salud y bienestar.',
+                    },
+                  },
+                  {
+                    '@type': 'Offer',
+                    itemOffered: {
+                      '@type': 'Service',
+                      name: 'Pilates',
+                      description: 'Clases de pilates individuales y grupales para mejorar postura y flexibilidad.',
+                    },
+                  },
+                  {
+                    '@type': 'Offer',
+                    itemOffered: {
+                      '@type': 'Service',
+                      name: 'Presoterapia',
+                      description: 'Tratamiento para mejorar la circulacion y reducir retencion de liquidos.',
+                    },
+                  },
+                  {
+                    '@type': 'Offer',
+                    itemOffered: {
+                      '@type': 'Service',
+                      name: 'Gimnasia Pasiva',
+                      description: 'Electroestimulacion muscular para tonificacion y recuperacion.',
+                    },
+                  },
+                ],
+              },
+              employee: [
+                { '@type': 'Person', name: 'Javier', jobTitle: 'Fisioterapeuta' },
+                { '@type': 'Person', name: 'Veronica', jobTitle: 'Fisioterapeuta' },
+                { '@type': 'Person', name: 'Selene', jobTitle: 'Fisioterapeuta' },
+                { '@type': 'Person', name: 'Bea', jobTitle: 'Fisioterapeuta' },
+                { '@type': 'Person', name: 'Cristina', jobTitle: 'Nutricionista' },
+                { '@type': 'Person', name: 'Rosa', jobTitle: 'Instructora de Pilates' },
+                { '@type': 'Person', name: 'Belen', jobTitle: 'Administracion' },
+                { '@type': 'Person', name: 'Esteban', jobTitle: 'Entrenador Personal' },
+              ],
             }),
           }}
         />
       </head>
-      <body className={`${inter.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased`}>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-4 focus:left-4 focus:bg-primary-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none"
+        >
+          Saltar al contenido principal
+        </a>
+        {children}
+      </body>
     </html>
   )
 }
