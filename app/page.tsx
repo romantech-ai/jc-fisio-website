@@ -14,6 +14,7 @@ const Contact = dynamic(() => import('@/components/sections/Contact').then(mod =
 const Footer = dynamic(() => import('@/components/shared/Footer').then(mod => ({ default: mod.Footer })))
 const WhatsAppButton = dynamic(() => import('@/components/shared/WhatsAppButton').then(mod => ({ default: mod.WhatsAppButton })))
 const CookieBanner = dynamic(() => import('@/components/shared/CookieBanner').then(mod => ({ default: mod.CookieBanner })))
+const Chatbot = dynamic(() => import('@/components/shared/Chatbot').then(mod => ({ default: mod.Chatbot })))
 
 export default function Home() {
   return (
@@ -31,6 +32,7 @@ export default function Home() {
       <Footer />
       <WhatsAppButton />
       <CookieBanner />
+      <Chatbot />
     </main>
   )
 }
