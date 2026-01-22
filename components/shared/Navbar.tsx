@@ -43,9 +43,7 @@ export function Navbar() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-black/5 py-2'
-            : atTop
-              ? 'bg-gradient-to-b from-white/60 to-transparent py-4'
-              : 'bg-transparent py-4'
+            : 'bg-transparent py-4'
         }`}
       >
         <div className="container mx-auto px-6">
@@ -66,7 +64,7 @@ export function Navbar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="relative text-gray-600 hover:text-primary-600 transition-colors font-medium group"
+                  className={`relative ${scrolled ? 'text-gray-600 hover:text-primary-600' : 'text-white/90 hover:text-white'} transition-colors font-medium group`}
                 >
                   {item.label}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary-600 group-hover:w-full transition-all duration-300" />
@@ -77,7 +75,7 @@ export function Navbar() {
             <div className="hidden lg:flex items-center gap-6">
               <a
                 href="tel:744624198"
-                className="flex items-center gap-2 text-gray-600 hover:text-primary-600 transition-colors"
+                className={`flex items-center gap-2 ${scrolled ? 'text-gray-600 hover:text-primary-600' : 'text-white/90 hover:text-white'} transition-colors`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -107,18 +105,18 @@ export function Navbar() {
                     rotate: mobileOpen ? 45 : 0,
                     y: mobileOpen ? 9 : 0
                   }}
-                  className="w-full h-0.5 bg-gray-900 origin-left"
+                  className={`w-full h-0.5 ${scrolled || mobileOpen ? 'bg-gray-900' : 'bg-white'} origin-left`}
                 />
                 <motion.span
                   animate={{ opacity: mobileOpen ? 0 : 1 }}
-                  className="w-full h-0.5 bg-gray-900"
+                  className={`w-full h-0.5 ${scrolled || mobileOpen ? 'bg-gray-900' : 'bg-white'}`}
                 />
                 <motion.span
                   animate={{
                     rotate: mobileOpen ? -45 : 0,
                     y: mobileOpen ? -9 : 0
                   }}
-                  className="w-full h-0.5 bg-gray-900 origin-left"
+                  className={`w-full h-0.5 ${scrolled || mobileOpen ? 'bg-gray-900' : 'bg-white'} origin-left`}
                 />
               </div>
             </button>

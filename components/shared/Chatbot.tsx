@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MessageSquare, X, Send, Bot, User, Phone, Loader2, Calendar, Clock } from 'lucide-react'
+import { MessageSquare, X, Send, Bot, User, Phone, Loader2, Calendar, Clock, MapPin, Sparkles } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { siteConfig } from '@/lib/config'
 
 interface Message {
   id: string
@@ -11,8 +12,141 @@ interface Message {
   content: string
 }
 
+interface ConversationData {
+  zonaCorporal: string | null
+  problema: string | null
+  especialista: string | null
+  diaPreferido: string | null
+  horarioPreferido: string | null
+}
+
 const STORAGE_KEY = 'jcfisio-chat'
-const WHATSAPP_NUMBER = '34744624198'
+
+// ================================================
+// EXTRACCION CONTEXTUAL DE DATOS
+// ================================================
+
+const ZONAS_CORPORALES = [
+  { keywords: ['espalda', 'lumbar', 'lumbares', 'columna'], value: 'Zona lumbar/espalda' },
+  { keywords: ['cuello', 'cervical', 'cervicales', 'nuca'], value: 'Zona cervical/cuello' },
+  { keywords: ['rodilla', 'rodillas'], value: 'Rodilla' },
+  { keywords: ['hombro', 'hombros'], value: 'Hombro' },
+  { keywords: ['tobillo', 'tobillos', 'pie', 'pies'], value: 'Tobillo/pie' },
+  { keywords: ['cadera', 'caderas'], value: 'Cadera' },
+  { keywords: ['muneca', 'mano', 'manos', 'dedos'], value: 'Mano/muneca' },
+  { keywords: ['codo', 'codos', 'brazo', 'brazos'], value: 'Codo/brazo' },
+]
+
+const PROBLEMAS = [
+  { keywords: ['dolor', 'duele', 'molestia', 'molesta'], value: 'Dolor' },
+  { keywords: ['contractura', 'contracturas', 'tension', 'rigidez'], value: 'Contractura/tension' },
+  { keywords: ['esguince', 'torcedura'], value: 'Esguince' },
+  { keywords: ['lesion', 'lesionado', 'lesione'], value: 'Lesion' },
+  { keywords: ['operacion', 'operado', 'cirugia', 'postoperatorio'], value: 'Rehabilitacion postoperatoria' },
+  { keywords: ['deportiva', 'deporte', 'entrenando', 'gimnasio'], value: 'Lesion deportiva' },
+]
+
+const DIAS = [
+  { keywords: ['lunes'], value: 'Lunes' },
+  { keywords: ['martes'], value: 'Martes' },
+  { keywords: ['miercoles'], value: 'Miercoles' },
+  { keywords: ['jueves'], value: 'Jueves' },
+  { keywords: ['viernes'], value: 'Viernes' },
+  { keywords: ['manana', 'siguiente'], value: 'Lo antes posible' },
+]
+
+const HORARIOS = [
+  { keywords: ['manana', 'temprano', 'primera hora'], value: 'Por la manana' },
+  { keywords: ['tarde', 'despues de comer'], value: 'Por la tarde' },
+  { keywords: ['mediodia'], value: 'A mediodia' },
+]
+
+function extractData(messages: Message[]): ConversationData {
+  const userMessages = messages.filter(m => m.role === 'user').map(m => m.content.toLowerCase())
+  const allText = userMessages.join(' ')
+
+  const findMatch = (patterns: { keywords: string[], value: string }[]): string | null => {
+    for (const pattern of patterns) {
+      if (pattern.keywords.some(k => allText.includes(k))) {
+        return pattern.value
+      }
+    }
+    return null
+  }
+
+  return {
+    zonaCorporal: findMatch(ZONAS_CORPORALES),
+    problema: findMatch(PROBLEMAS),
+    especialista: allText.includes('nutricion') ? 'Nutricionista' :
+                  allText.includes('pilates') ? 'Pilates' :
+                  allText.includes('entrenador') || allText.includes('entrenamiento') ? 'Entrenador Personal' :
+                  allText.includes('fisio') ? 'Fisioterapeuta' : null,
+    diaPreferido: findMatch(DIAS),
+    horarioPreferido: findMatch(HORARIOS),
+  }
+}
+
+// ================================================
+// GENERADOR DE MENSAJE WHATSAPP
+// ================================================
+
+function generateWhatsAppMessage(messages: Message[]): string {
+  const data = extractData(messages)
+  const hasData = Object.values(data).some(v => v !== null)
+
+  if (!hasData) {
+    // Sin datos extraidos, usar resumen simple
+    const summary = messages
+      .filter(m => m.role === 'user')
+      .map(m => m.content)
+      .slice(-3)
+      .join(' | ')
+
+    return summary
+      ? `Hola! Vengo del chat de la web. Consultaba sobre: ${summary.slice(0, 150)}`
+      : siteConfig.whatsappMessage
+  }
+
+  // Con datos extraidos, mensaje estructurado
+  const parts = ['-- SOLICITUD DE CITA --']
+
+  if (data.problema && data.zonaCorporal) {
+    parts.push(`MOTIVO: ${data.problema} en ${data.zonaCorporal}`)
+  } else if (data.problema) {
+    parts.push(`MOTIVO: ${data.problema}`)
+  } else if (data.zonaCorporal) {
+    parts.push(`ZONA: ${data.zonaCorporal}`)
+  }
+
+  if (data.especialista) {
+    parts.push(`SERVICIO: ${data.especialista}`)
+  }
+
+  if (data.diaPreferido || data.horarioPreferido) {
+    const pref = [data.diaPreferido, data.horarioPreferido].filter(Boolean).join(' ')
+    parts.push(`PREFERENCIA: ${pref}`)
+  }
+
+  parts.push('--')
+  parts.push('Quedo a la espera de confirmacion. Gracias!')
+
+  return parts.join('\n')
+}
+
+// ================================================
+// DETECTAR SI MOSTRAR CTA WHATSAPP
+// ================================================
+
+const WHATSAPP_TRIGGERS = [
+  'cita', 'reservar', 'reserva', 'pedir cita', 'hora',
+  'cuando', 'disponibilidad', 'hueco', 'urgente',
+  'llamar', 'contactar', 'telefono'
+]
+
+function shouldShowWhatsAppCTA(content: string): boolean {
+  const lower = content.toLowerCase()
+  return WHATSAPP_TRIGGERS.some(trigger => lower.includes(trigger))
+}
 
 // Convert phone numbers to WhatsApp links
 function processMessageContent(content: string): string {
@@ -29,13 +163,14 @@ function processMessageContent(content: string): string {
 const initialMessage: Message = {
   id: '1',
   role: 'assistant',
-  content: 'Hola! Soy el asistente de Clinica JC Fisio. ¿En que puedo ayudarte? Puedo informarte sobre nuestros servicios o ayudarte a reservar cita.',
+  content: siteConfig.chatbot.welcomeMessage,
 }
 
 const quickReplies = [
   { label: 'Reservar cita', icon: Calendar },
-  { label: 'Ver servicios', icon: MessageSquare },
+  { label: 'Ver servicios', icon: Sparkles },
   { label: 'Horarios', icon: Clock },
+  { label: 'Ubicacion', icon: MapPin },
 ]
 
 export function Chatbot() {
@@ -46,6 +181,13 @@ export function Chatbot() {
   const [showQuickReplies, setShowQuickReplies] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Extraer datos de la conversacion
+  const conversationData = useMemo(() => extractData(messages), [messages])
+  const hasConversationData = useMemo(
+    () => Object.values(conversationData).some(v => v !== null),
+    [conversationData]
+  )
 
   // Load messages from localStorage
   useEffect(() => {
@@ -120,7 +262,7 @@ export function Chatbot() {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Ups, hubo un problema. ¿Prefieres contactarnos por WhatsApp o llamar al 744 62 41 98?',
+        content: `Ups, hubo un problema. Puedes contactarnos por WhatsApp o llamar al ${siteConfig.phone}`,
       }
       setMessages(prev => [...prev, errorMessage])
     } finally {
@@ -137,18 +279,11 @@ export function Chatbot() {
     sendMessage(label)
   }
 
-  const openWhatsApp = () => {
-    const summary = messages
-      .filter(m => m.role === 'user')
-      .map(m => m.content)
-      .join(' | ')
-
-    const text = summary
-      ? `Hola! Vengo del chat de la web. Estaba preguntando sobre: ${summary.slice(0, 200)}`
-      : 'Hola! Me gustaria informacion sobre vuestros servicios.'
-
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`, '_blank')
-  }
+  const openWhatsApp = useCallback(() => {
+    const message = generateWhatsAppMessage(messages)
+    const whatsappNumber = siteConfig.whatsapp.replace('+', '')
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank')
+  }, [messages])
 
   const clearChat = () => {
     setMessages([initialMessage])
@@ -204,7 +339,7 @@ export function Chatbot() {
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-semibold text-sm">Asistente JC Fisio</p>
+                  <p className="font-semibold text-sm">Asistente {siteConfig.shortName}</p>
                   <p className="text-xs text-primary-100 flex items-center gap-1">
                     <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                     Online ahora
@@ -229,9 +364,33 @@ export function Chatbot() {
               </div>
             </div>
 
+            {/* Datos extraidos (si hay) */}
+            {hasConversationData && (
+              <div className="px-4 py-2 bg-primary-50 border-b border-primary-100">
+                <p className="text-xs text-primary-700 font-medium mb-1">Datos detectados:</p>
+                <div className="flex flex-wrap gap-1">
+                  {conversationData.problema && (
+                    <span className="text-xs bg-white px-2 py-0.5 rounded-full text-primary-600">
+                      {conversationData.problema}
+                    </span>
+                  )}
+                  {conversationData.zonaCorporal && (
+                    <span className="text-xs bg-white px-2 py-0.5 rounded-full text-primary-600">
+                      {conversationData.zonaCorporal}
+                    </span>
+                  )}
+                  {conversationData.especialista && (
+                    <span className="text-xs bg-white px-2 py-0.5 rounded-full text-primary-600">
+                      {conversationData.especialista}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {messages.map((message) => (
+              {messages.map((message, index) => (
                 <motion.div
                   key={message.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -248,31 +407,46 @@ export function Chatbot() {
                       : <Bot className="w-4 h-4 text-white" />
                     }
                   </div>
-                  <div className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-sm ${
-                    message.role === 'user'
-                      ? 'bg-primary-600 text-white rounded-tr-sm'
-                      : 'bg-white text-gray-700 rounded-tl-sm shadow-sm border border-gray-100'
-                  }`}>
-                    {message.role === 'assistant' ? (
-                      <ReactMarkdown
-                        components={{
-                          a: ({ href, children }) => (
-                            <a
-                              href={href}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary-600 hover:text-primary-700 underline underline-offset-2 transition-colors"
-                            >
-                              {children}
-                            </a>
-                          ),
-                          p: ({ children }) => <span>{children}</span>,
-                        }}
+                  <div className="flex flex-col gap-2 max-w-[75%]">
+                    <div className={`rounded-2xl px-4 py-2.5 text-sm ${
+                      message.role === 'user'
+                        ? 'bg-primary-600 text-white rounded-tr-sm'
+                        : 'bg-white text-gray-700 rounded-tl-sm shadow-sm border border-gray-100'
+                    }`}>
+                      {message.role === 'assistant' ? (
+                        <ReactMarkdown
+                          components={{
+                            a: ({ href, children }) => (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary-600 hover:text-primary-700 underline underline-offset-2 transition-colors"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            p: ({ children }) => <span>{children}</span>,
+                          }}
+                        >
+                          {processMessageContent(message.content)}
+                        </ReactMarkdown>
+                      ) : (
+                        message.content
+                      )}
+                    </div>
+
+                    {/* CTA WhatsApp contextual en respuestas del asistente */}
+                    {message.role === 'assistant' && index > 0 && shouldShowWhatsAppCTA(message.content) && (
+                      <motion.button
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        onClick={openWhatsApp}
+                        className="self-start flex items-center gap-2 bg-[#25D366] hover:bg-[#20BD5A] text-white text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
                       >
-                        {processMessageContent(message.content)}
-                      </ReactMarkdown>
-                    ) : (
-                      message.content
+                        <Phone className="w-3 h-3" />
+                        Confirmar por WhatsApp
+                      </motion.button>
                     )}
                   </div>
                 </motion.div>
@@ -333,7 +507,7 @@ export function Chatbot() {
                 className="w-full py-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 rounded-xl text-[#25D366] text-sm font-medium flex items-center justify-center gap-2 transition-colors"
               >
                 <Phone className="w-4 h-4" />
-                Continuar por WhatsApp
+                {hasConversationData ? 'Reservar cita por WhatsApp' : 'Continuar por WhatsApp'}
               </button>
             </div>
 

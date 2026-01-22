@@ -1,10 +1,18 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Libre_Baskerville, DM_Sans } from 'next/font/google'
 import './globals.css'
+import { GoogleAnalytics } from '@/components/analytics'
 
-const inter = Inter({
+const libreBaskerville = Libre_Baskerville({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['400', '700'],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-body',
   display: 'swap',
 })
 
@@ -51,10 +59,10 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es" className={inter.variable}>
+    <html lang="es" className={`${libreBaskerville.variable} ${dmSans.variable}`}>
       <head>
         <link rel="icon" href="/favicon.ico" />
-        <meta name="theme-color" content="#0d9488" />
+        <meta name="theme-color" content="#84cc16" />
         <meta name="geo.region" content="ES-CR" />
         <meta name="geo.placename" content="Tomelloso" />
         <script
@@ -162,7 +170,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${dmSans.className} antialiased`}>
+        <GoogleAnalytics />
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-4 focus:left-4 focus:bg-primary-600 focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none"
